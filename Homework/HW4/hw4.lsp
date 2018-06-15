@@ -19,6 +19,7 @@
 ; "node n gets color c" (when there are k possible colors).
 ;
 (defun node2var (n c k)
+  ; return (n-1)*k + c
   (+ (* (- n 1) k) c)
   )
 
@@ -27,15 +28,22 @@
 ; "node n gets at least one color from the set {c,c+1,...,k}."
 ;
 (defun at-least-one-color (n c k)
+  ; return all possible assignments
   (cond
     ((> c k) nil)
     (t (cons (node2var n c k) (at-least-one-color n (+ c 1) k)))
   )
   )
 
+; helper function for at-most-one-color
+; takes in a list representing at least one color
+; returns the list representing at most one color 
 (defun at-most-helper (list)
   (cond
+    ; if the list is empty
     ((null (cdr list)) nil)
+    ; return the list of clauses which consists of all combinations of 
+    ; a negated element and each of its consequent elements
     (t (cons (list (- (car list)) (- (cadr list))) (at-most-helper (cons (car list) (cdr (cdr list))))))
   )
 )
@@ -58,9 +66,16 @@
   (cons (at-least-one-color n 1 k) (at-most-one-color n 1 k))
   )
 
+; helper funtion for generate edge clauses
+; takes in node x, node y, starting index c, and number of colors k
+; returns a list of clauses that prohibit nodes x and y from having
+; the same color in the set {1, 2, ..., k}
 (defun generate-edge-clauses-helper (x y c k)
   (cond
+    ; if c > k, return nil
     ((> c k) nil)
+    ; x and y can't have the same color
+    ; recursively call itself for all colors from c to k
     (t (cons (list (- (node2var x c k)) (- (node2var y c k))) (generate-edge-clauses-helper x y (+ c 1) k)))
   )
 )
